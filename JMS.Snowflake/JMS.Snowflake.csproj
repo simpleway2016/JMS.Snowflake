@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
-	  <Version>1.0.3</Version>
+	  <Version>1.0.5</Version>
 	  <Authors>Jack.T</Authors>
 	  <Description>.Net 雪花算法生成唯一id</Description>
 	  <GenerateDocumentationFile>True</GenerateDocumentationFile>

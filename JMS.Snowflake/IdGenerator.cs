@@ -75,17 +75,19 @@ namespace JMS.Snowflake
                         _sequence = 0;
                         _lastTimestamp = time;
                     }
-
-                    _sequence++;
-                    if (_sequence > 4095)
+                    else
                     {
-                        //当machine部分的bit不为0时，证明序列号已经超过1023
-                        //序列号超过最大值1023，要等time变动到下一豪秒
-                        while (getTimeStamp() == time)
+                        _sequence++;
+                        if (_sequence > 4095)
                         {
-                            Thread.Yield();
+                            //当machine部分的bit不为0时，证明序列号已经超过1023
+                            //序列号超过最大值1023，要等time变动到下一豪秒
+                            while (getTimeStamp() == time)
+                            {
+                                Thread.Yield();
+                            }
+                            continue;
                         }
-                        continue;
                     }
 
                     return _machineId | (_lastTimestamp << TimeBitOffset) | _sequence;

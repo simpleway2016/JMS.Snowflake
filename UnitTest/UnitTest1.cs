@@ -31,7 +31,7 @@ namespace UnitTest
                 var time = id >> 22;
                 var machineid = (id >> 12) & 1023;
                 var sequence = id & 4095;
-                if (machineid != 2 || sequence == 0)
+                if (machineid != 2 )
                     throw new Exception("error");
 
                 if (ids.ContainsKey(id))
