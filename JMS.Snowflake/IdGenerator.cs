@@ -6,7 +6,7 @@ namespace JMS.Snowflake
     /// <summary>
     /// 雪花id生成器
     /// </summary>
-    public class IdGenerator: ISnowflakeGenerator
+    public class IdGenerator : ISnowflakeGenerator
     {
         /// <summary>
         /// 基准时间
@@ -38,7 +38,7 @@ namespace JMS.Snowflake
         {
             if (machineId < 0 || machineId > 1023)
                 throw new ArgumentException("machineId超出范围");
-            this._machineId = machineId<< MachineBitOffset;
+            this._machineId = machineId << MachineBitOffset;
         }
 
         /// <summary>
@@ -47,35 +47,36 @@ namespace JMS.Snowflake
         /// <returns></returns>
         public long NewId()
         {
-            lock (_lock)
+
+            while (true)
             {
-                while (true)
+                var time = getTimeStamp();
+
+                if (time < _lastTimestamp)
                 {
-                    var time = getTimeStamp();
+
+                    for (int i = 0; i < 20; i++)
+                    {
+                        Thread.Sleep(100);
+                        time = getTimeStamp();
+                        if (time >= _lastTimestamp)
+                            break;
+                    }
 
                     if (time < _lastTimestamp)
                     {
-
-                        for (int i = 0; i < 20; i++)
-                        {
-                            Thread.Sleep(100);
-                            time = getTimeStamp();
-                            if (time >= _lastTimestamp)
-                                break;
-                        }
-
-                        if (time < _lastTimestamp)
-                        {
-                            throw new Exception($"系统时钟出现回撤，当前时间比上一次生成id的时间回撤了{_lastTimestamp - time}毫秒");
-                        }
+                        throw new Exception($"系统时钟出现回撤，当前时间比上一次生成id的时间回撤了{_lastTimestamp - time}毫秒");
                     }
+                }
 
+                lock (_lock)
+                {
                     if (time > _lastTimestamp)
                     {
                         _sequence = 0;
                         _lastTimestamp = time;
                     }
-                    else
+                    else if (time == _lastTimestamp)
                     {
                         _sequence++;
                         if (_sequence > 4095)
@@ -88,6 +89,10 @@ namespace JMS.Snowflake
                             }
                             continue;
                         }
+                    }
+                    else
+                    {
+                        continue;
                     }
 
                     return _machineId | (_lastTimestamp << TimeBitOffset) | _sequence;
