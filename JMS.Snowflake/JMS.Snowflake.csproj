@@ -7,5 +7,7 @@
 	  <Description>.Net 雪花算法生成唯一id</Description>
 	  <GenerateDocumentationFile>True</GenerateDocumentationFile>
   </PropertyGroup>
-
+	<PropertyGroup Condition="'$(Configuration)'=='Release'">
+		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+	</PropertyGroup>
 </Project>
