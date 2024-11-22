@@ -22,20 +22,19 @@ namespace UnitTest
             while (true)
             {
                 var id = generator.NewId();
+                var time = id >> 22;
+                var machineid = (id >> 12) & 1023;
+                var sequence = id & 4095;
+                if (machineid != 2 || sequence == 0)
+                    throw new Exception("error");
+
                 if (ids.ContainsKey(id))
                 {
-                    var time = id >> 22;
-                    var machineid = (id >> 12) & 1023;
-                    var sequence = id & 4095;
                     var b = ids[id];
                     throw new Exception("id÷ÿ∏¥");
                 }
                 if (id < lastid)
                 {
-                    var time = id >> 22;
-                    var machineid = (id >> 12) & 1023;
-                    var sequence = id & 4095;
-
                     var time2 = lastid >> 22;
                     var machineid2 = (lastid >> 12) & 1023;
                     var sequence2 = lastid & 4095;

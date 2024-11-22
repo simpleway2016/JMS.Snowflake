@@ -28,6 +28,8 @@ namespace JMS.Snowflake
         /// </summary>
         private long _sequence = 0;
 
+        private long _lastTimestamp = 0;
+        object _lock = new object();
         /// <summary>
         /// 
         /// </summary>
@@ -45,52 +47,49 @@ namespace JMS.Snowflake
         /// <returns></returns>
         public long NewId()
         {
-            while (true)
+            lock (_lock)
             {
-                var time = getTimeStamp();
-                var lasttime = _sequence >> TimeBitOffset;
-                if (time < lasttime)
+                while (true)
                 {
+                    var time = getTimeStamp();
 
-                    for (int i = 0; i < 20; i++)
+                    if (time < _lastTimestamp)
                     {
-                        Thread.Sleep(100);
-                        time = getTimeStamp();
-                        if (time >= lasttime)
-                            break;
-                    }
 
-                    if (time < lasttime)
-                    {
-                        throw new Exception($"系统时钟出现回撤，当前时间比上一次生成id的时间回撤了{lasttime - time}毫秒");
-                    }
-                }
-
-                while (time > (_sequence >> TimeBitOffset))
-                {
-                    var old = _sequence;
-                    if (time > (old >> TimeBitOffset))
-                    {
-                        if (Interlocked.CompareExchange(ref _sequence, time << TimeBitOffset, old) == old)
+                        for (int i = 0; i < 20; i++)
                         {
-                            break;
+                            Thread.Sleep(100);
+                            time = getTimeStamp();
+                            if (time >= _lastTimestamp)
+                                break;
+                        }
+
+                        if (time < _lastTimestamp)
+                        {
+                            throw new Exception($"系统时钟出现回撤，当前时间比上一次生成id的时间回撤了{_lastTimestamp - time}毫秒");
                         }
                     }
-                }
 
-                var curSequence = Interlocked.Increment(ref _sequence);
-                if ((curSequence & MachineMask) != 0)
-                {
-                    //当machine部分的bit不为0时，证明序列号已经超过1023
-                    //序列号超过最大值1023，要等time变动到下一豪秒
-                    while (getTimeStamp() == time)
+                    if (time > _lastTimestamp)
                     {
-                        Thread.Yield();
+                        _sequence = 0;
+                        _lastTimestamp = time;
                     }
-                    continue;
-                }
 
-                return _machineId | curSequence;
+                    _sequence++;
+                    if (_sequence > 4095)
+                    {
+                        //当machine部分的bit不为0时，证明序列号已经超过1023
+                        //序列号超过最大值1023，要等time变动到下一豪秒
+                        while (getTimeStamp() == time)
+                        {
+                            Thread.Yield();
+                        }
+                        continue;
+                    }
+
+                    return _machineId | (_lastTimestamp << TimeBitOffset) | _sequence;
+                }
             }
         }
 
