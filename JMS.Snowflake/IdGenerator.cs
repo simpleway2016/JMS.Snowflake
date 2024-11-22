@@ -6,7 +6,7 @@ namespace JMS.Snowflake
     /// <summary>
     /// 雪花id生成器
     /// </summary>
-    public class IdGenerator
+    public class IdGenerator: ISnowflakeGenerator
     {
         /// <summary>
         /// 基准时间

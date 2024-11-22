@@ -1,4 +1,5 @@
 using JMS.Snowflake;
+using Microsoft.Extensions.DependencyInjection;
 using System.Collections.Concurrent;
 using System.Diagnostics;
 
@@ -13,8 +14,13 @@ namespace UnitTest
         [Fact]
         public void IdGeneratorTest()
         {
+            var services = new ServiceCollection();
+            services.AddSnowflakeGenerator(2);
+            var serviceProvider = services.BuildServiceProvider();
+
             ConcurrentDictionary<long,bool> ids = new ConcurrentDictionary<long, bool>();
-            var generator = new IdGenerator(2);
+            var generator = serviceProvider.GetService<ISnowflakeGenerator<UnitTest1>>();
+
             new Thread(() => { make(ids, generator); }).Start();
             long lastid = 0;
             DateTime lasttime = DateTime.Now;
@@ -62,7 +68,7 @@ namespace UnitTest
             }
         }
 
-        void make(ConcurrentDictionary<long, bool> ids, IdGenerator generator)
+        void make(ConcurrentDictionary<long, bool> ids, ISnowflakeGenerator generator)
         { 
             long lastid = 0;
             while (true)

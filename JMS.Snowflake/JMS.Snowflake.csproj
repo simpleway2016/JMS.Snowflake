@@ -2,12 +2,16 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
-	  <Version>1.0.1</Version>
+	  <Version>1.0.3</Version>
 	  <Authors>Jack.T</Authors>
 	  <Description>.Net 雪花算法生成唯一id</Description>
 	  <GenerateDocumentationFile>True</GenerateDocumentationFile>
+	  <PackageProjectUrl>https://github.com/simpleway2016/JMS.Snowflake.git</PackageProjectUrl>
   </PropertyGroup>
 	<PropertyGroup Condition="'$(Configuration)'=='Release'">
 		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
 	</PropertyGroup>
+	<ItemGroup>
+	  <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="6.0.0" />
+	</ItemGroup>
 </Project>
