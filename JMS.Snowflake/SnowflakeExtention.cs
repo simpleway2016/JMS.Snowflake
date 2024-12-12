@@ -12,7 +12,7 @@ namespace Microsoft.Extensions.DependencyInjection
         /// 依赖注入ISnowflakeGenerator接口
         /// </summary>
         /// <param name="services"></param>
-        /// <param name="machineId">机器id</param>
+        /// <param name="machineId">机器id，范围：0-1023</param>
         /// <returns></returns>
         public static IServiceCollection AddSnowflakeGenerator(this IServiceCollection services, int machineId)
         {
