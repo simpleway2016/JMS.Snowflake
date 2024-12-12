@@ -16,6 +16,9 @@ namespace Microsoft.Extensions.DependencyInjection
         /// <returns></returns>
         public static IServiceCollection AddSnowflakeGenerator(this IServiceCollection services, int machineId)
         {
+            if (machineId < 0 || machineId > 1023)
+                throw new ArgumentException("machineId超出范围（0-1023）");
+
             GlobalEnvironment.MachineId = machineId;
             services.AddSingleton(typeof(ISnowflakeGenerator<>), typeof(DefaultSnowflakeGenerator<>));
             services.AddSingleton<ISnowflakeGeneratorFactory,DefaultSnowflakeGeneratorFactory>();
